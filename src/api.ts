@@ -84,7 +84,7 @@ export async function sendChatMessage(
     clearTimeout(timeout);
     if (!res.ok) throw new Error('API error');
     const data = await res.json();
-    return data.response ?? data.content ?? data.message ?? 'Respuesta recibida.';
+    return data.reply ?? data.response ?? data.content ?? 'Respuesta recibida.';
   } catch {
     return `[Modo demo — API no disponible] Recibí tu mensaje como ${mode}: "${message}". Cuando el servidor esté disponible, recibirás una respuesta real.`;
   }
