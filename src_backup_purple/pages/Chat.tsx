@@ -10,16 +10,18 @@ interface Message {
   timestamp: Date;
 }
 
+// Mode accent colors — new purple/wine palette
 const MODE_COLOR: Record<ModeId, string> = {
-  finanzas: '#0ea5e9', ceo: '#0ea5e9', coach: '#38bdf8', fit: '#7dd3fc',
-  medico: '#0ea5e9', abogado: '#38bdf8', chef: '#7dd3fc', gym_coach: '#7dd3fc',
-  lol_coach: '#38bdf8', tutor: '#0ea5e9', psicologia: '#38bdf8', investigador: '#0ea5e9',
-  negocios: '#0ea5e9', tecnologia: '#38bdf8', automatizacion: '#0ea5e9',
-  compras: '#38bdf8', alimentos_industriales: '#0ea5e9', viajes_planner: '#38bdf8',
-  contenido: '#7dd3fc', scholar: '#38bdf8',
+  finanzas: '#7c3aed', ceo: '#7c3aed', coach: '#9333ea', fit: '#c0392b',
+  medico: '#7c3aed', abogado: '#9333ea', chef: '#c0392b', gym_coach: '#c0392b',
+  lol_coach: '#9333ea', tutor: '#7c3aed', psicologia: '#9333ea', investigador: '#7c3aed',
+  negocios: '#7c3aed', tecnologia: '#9333ea', automatizacion: '#7c3aed',
+  compras: '#9333ea', alimentos_industriales: '#7c3aed', viajes_planner: '#9333ea',
+  contenido: '#c0392b', scholar: '#9333ea',
 };
-const modeColor = (id: ModeId) => MODE_COLOR[id] ?? '#0ea5e9';
+const modeColor = (id: ModeId) => MODE_COLOR[id] ?? '#7c3aed';
 
+// ── Mode button ───────────────────────────────────────────────────────────────
 function ModeButton({ mode, active, onClick }: { mode: typeof CHAT_MODES[number]; active: boolean; onClick: () => void }) {
   const [hovered, setHovered] = useState(false);
   return (
@@ -28,24 +30,30 @@ function ModeButton({ mode, active, onClick }: { mode: typeof CHAT_MODES[number]
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        display: 'block', width: '100%', textAlign: 'left',
-        padding: '10px 16px', borderRadius: 10, border: 'none', cursor: 'pointer',
-        background: active ? 'rgba(14,165,233,0.12)' : hovered ? 'rgba(14,165,233,0.05)' : 'transparent',
-        borderLeft: active ? '3px solid #0ea5e9' : '3px solid transparent',
+        display: 'block',
+        width: '100%',
+        textAlign: 'left',
+        padding: '12px 16px',
+        borderRadius: 8,
+        background: active ? '#1e1035' : hovered ? '#160d28' : 'transparent',
+        borderLeft: active ? '3px solid #c0392b' : '3px solid transparent',
         paddingLeft: active ? 13 : 16,
+        cursor: 'pointer',
+        border: 'none',
         transition: 'background 0.15s ease',
       }}
     >
-      <p style={{ fontSize: '0.85rem', color: active ? '#f0f9ff' : '#94a3b8', fontWeight: active ? 600 : 500, marginBottom: 2, lineHeight: 1.3 }}>
+      <p style={{ fontSize: '0.85rem', color: active ? '#f0d0ff' : '#e0e0f8', fontWeight: active ? 600 : 500, marginBottom: 2, lineHeight: 1.3 }}>
         {mode.label}
       </p>
-      <p style={{ fontSize: '0.75rem', color: active ? '#0ea5e9' : '#475569', lineHeight: 1.4 }}>
+      <p style={{ fontSize: '0.75rem', color: active ? '#c084fc' : '#b0b0cc', lineHeight: 1.4 }}>
         {mode.description}
       </p>
     </button>
   );
 }
 
+// ── Chat bubble ───────────────────────────────────────────────────────────────
 function ChatBubble({ message, accentColor }: { message: Message; accentColor: string }) {
   const isUser = message.role === 'user';
   return (
@@ -53,22 +61,22 @@ function ChatBubble({ message, accentColor }: { message: Message; accentColor: s
       <div style={{
         width: 32, height: 32, borderRadius: 8, flexShrink: 0, marginTop: 2,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: isUser ? 'rgba(255,255,255,0.05)' : `${accentColor}18`,
-        border: `1px solid ${isUser ? 'rgba(255,255,255,0.1)' : accentColor + '60'}`,
+        background: isUser ? '#1e1035' : `${accentColor}18`,
+        border: `1px solid ${isUser ? '#3d1f5e' : accentColor + '60'}`,
       }}>
-        {isUser ? <User size={14} style={{ color: '#94a3b8' }} /> : <Bot size={14} style={{ color: accentColor }} />}
+        {isUser ? <User size={14} style={{ color: '#c084fc' }} /> : <Bot size={14} style={{ color: accentColor }} />}
       </div>
       <div style={{
         maxWidth: '72%',
-        background: isUser ? 'rgba(255,255,255,0.05)' : `${accentColor}0d`,
-        border: `1px solid ${isUser ? 'rgba(255,255,255,0.1)' : accentColor + '40'}`,
+        background: isUser ? '#1a1128' : `${accentColor}10`,
+        border: `1px solid ${isUser ? '#3d1f5e' : accentColor + '40'}`,
         borderRadius: isUser ? '12px 4px 12px 12px' : '4px 12px 12px 12px',
         padding: '10px 14px',
       }}>
-        <p style={{ color: '#cbd5e1', fontSize: '0.9rem', lineHeight: 1.6, whiteSpace: 'pre-wrap', margin: 0 }}>
+        <p style={{ color: '#e0e0f8', fontSize: '0.9rem', lineHeight: 1.6, whiteSpace: 'pre-wrap', margin: 0 }}>
           {message.content}
         </p>
-        <p style={{ color: '#475569', fontSize: '0.7rem', marginTop: 4 }}>
+        <p style={{ color: '#6060a0', fontSize: '0.7rem', marginTop: 4 }}>
           {message.timestamp.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
         </p>
       </div>
@@ -76,6 +84,7 @@ function ChatBubble({ message, accentColor }: { message: Message; accentColor: s
   );
 }
 
+// ── Main Chat component ───────────────────────────────────────────────────────
 export default function Chat() {
   const [activeMode, setActiveMode] = useState<ModeId>('finanzas');
   const [messages, setMessages] = useState<Record<ModeId, Message[]>>({} as Record<ModeId, Message[]>);
@@ -113,38 +122,56 @@ export default function Chat() {
   return (
     <div style={{ display: 'flex', flexDirection: 'row', height: '100%', overflow: 'hidden' }}>
 
-      {/* LEFT: AI Modes */}
+      {/* ── LEFT PANEL: AI Modes ────────────────────────────────────────────── */}
       <div style={{
-        width: 280, flexShrink: 0, display: 'flex', flexDirection: 'column',
-        background: 'rgba(2,8,24,0.95)', borderRight: '1px solid rgba(255,255,255,0.08)',
+        width: 280,
+        flexShrink: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        background: '#0e0a16',
+        borderRight: '1px solid #2d1f42',
         overflow: 'hidden',
       }}>
-        <div style={{ padding: '16px 20px 12px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-          <p style={{ background: 'linear-gradient(135deg, #0ea5e9, #38bdf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', margin: 0 }}>
+        {/* Panel header */}
+        <div style={{ padding: '16px 20px 12px', borderBottom: '1px solid #2d1f42' }}>
+          <p style={{ color: '#c0392b', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>
             Kyro Chat
           </p>
-          <p style={{ color: '#475569', fontSize: '0.72rem', marginTop: 2 }}>Selecciona un asistente</p>
+          <p style={{ color: '#6060a0', fontSize: '0.72rem', marginTop: 2 }}>Selecciona un asistente</p>
         </div>
-        <div style={{ flex: 1, overflowY: 'auto', padding: '8px', scrollbarWidth: 'thin' }}>
+
+        {/* Mode list */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '8px 8px', scrollbarWidth: 'thin' }}>
           {CHAT_MODES.map(mode => (
-            <ModeButton key={mode.id} mode={mode} active={activeMode === mode.id} onClick={() => setActiveMode(mode.id)} />
+            <ModeButton
+              key={mode.id}
+              mode={mode}
+              active={activeMode === mode.id}
+              onClick={() => setActiveMode(mode.id)}
+            />
           ))}
         </div>
-        <div style={{ padding: '12px 20px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-          <p style={{ color: '#475569', fontSize: '0.7rem', margin: 0 }}>
+
+        {/* Panel footer */}
+        <div style={{ padding: '12px 20px', borderTop: '1px solid #2d1f42' }}>
+          <p style={{ color: '#4a4a6a', fontSize: '0.7rem', margin: 0 }}>
             {new Date().toLocaleDateString('es-CO')}
           </p>
         </div>
       </div>
 
-      {/* RIGHT: Chat Area */}
-      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', background: 'transparent', overflow: 'hidden' }}>
+      {/* ── RIGHT PANEL: Chat Area ──────────────────────────────────────────── */}
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', background: '#080808', overflow: 'hidden' }}>
 
-        {/* Header */}
+        {/* Chat header */}
         <div style={{
-          padding: '14px 24px', borderBottom: `1px solid ${accent}30`,
-          display: 'flex', alignItems: 'center', gap: 12,
-          background: 'rgba(2,8,24,0.8)', backdropFilter: 'blur(20px)', flexShrink: 0,
+          padding: '14px 24px',
+          borderBottom: `1px solid ${accent}30`,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          background: '#0e0a16',
+          flexShrink: 0,
         }}>
           <div style={{
             width: 36, height: 36, borderRadius: 10, flexShrink: 0,
@@ -154,25 +181,35 @@ export default function Chat() {
             <Bot size={18} style={{ color: accent }} />
           </div>
           <div>
-            <p style={{ color: '#f0f9ff', fontSize: '0.9rem', fontWeight: 700, margin: 0 }}>{currentMode.label}</p>
-            <p style={{ color: '#475569', fontSize: '0.75rem', margin: 0 }}>{currentMode.description}</p>
+            <p style={{ color: '#f0f0ff', fontSize: '0.9rem', fontWeight: 700, margin: 0 }}>
+              {currentMode.label}
+            </p>
+            <p style={{ color: '#8080a0', fontSize: '0.75rem', margin: 0 }}>
+              {currentMode.description}
+            </p>
           </div>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#10b981', display: 'inline-block', animation: 'pulse-dot 2s infinite' }} />
-            <span style={{ color: '#475569', fontSize: '0.75rem' }}>Online</span>
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#7c3aed', display: 'inline-block', animation: 'pulse-dot 2s infinite' }} />
+            <span style={{ color: '#6060a0', fontSize: '0.75rem' }}>Online</span>
           </div>
         </div>
 
-        {/* Messages */}
+        {/* Messages area */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
           {currentMessages.length === 0 && (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '40px 32px' }}>
               <div style={{ width: 56, height: 56, borderRadius: 14, background: `${accent}12`, border: `1px solid ${accent}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
                 <Bot size={26} style={{ color: accent }} />
               </div>
-              <p style={{ color: '#f0f9ff', fontSize: '1rem', fontWeight: 600, margin: '0 0 8px' }}>{currentMode.label}</p>
-              <p style={{ color: '#475569', fontSize: '0.85rem', maxWidth: 280, lineHeight: 1.5, margin: '0 0 24px' }}>{currentMode.description}</p>
-              <p style={{ color: '#475569', fontSize: '0.75rem' }}>Escribe un mensaje para comenzar · Enter para enviar</p>
+              <p style={{ color: '#e0e0f8', fontSize: '1rem', fontWeight: 600, margin: '0 0 8px' }}>
+                {currentMode.label}
+              </p>
+              <p style={{ color: '#8080a0', fontSize: '0.85rem', maxWidth: 280, lineHeight: 1.5, margin: '0 0 24px' }}>
+                {currentMode.description}
+              </p>
+              <p style={{ color: '#4a4a6a', fontSize: '0.75rem' }}>
+                Escribe un mensaje para comenzar · Enter para enviar
+              </p>
             </div>
           )}
           {currentMessages.map(msg => (
@@ -191,14 +228,16 @@ export default function Chat() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
-        <div style={{ padding: '12px 24px 16px', borderTop: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
+        {/* Input area */}
+        <div style={{ padding: '12px 24px 16px', borderTop: '1px solid #2d1f42', flexShrink: 0 }}>
           <div style={{
-            display: 'flex', alignItems: 'flex-end', gap: 10,
-            background: 'rgba(14,165,233,0.05)',
-            backdropFilter: 'blur(20px)',
-            border: `1px solid ${inputFocused ? '#0ea5e9' : 'rgba(255,255,255,0.1)'}`,
-            borderRadius: 10, padding: '10px 14px',
+            display: 'flex',
+            alignItems: 'flex-end',
+            gap: 10,
+            background: '#1a1128',
+            border: `1px solid ${inputFocused ? '#7c3aed' : '#3d1f5e'}`,
+            borderRadius: 10,
+            padding: '10px 14px',
             transition: 'border-color 0.2s ease',
           }}>
             <textarea
@@ -210,9 +249,16 @@ export default function Chat() {
               placeholder="Escribe un mensaje..."
               rows={1}
               style={{
-                flex: 1, background: 'transparent', border: 'none', outline: 'none',
-                color: '#f0f9ff', fontSize: '0.95rem', lineHeight: 1.5,
-                resize: 'none', maxHeight: 120, scrollbarWidth: 'none',
+                flex: 1,
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+                color: '#e8e8ff',
+                fontSize: '0.95rem',
+                lineHeight: 1.5,
+                resize: 'none',
+                maxHeight: 120,
+                scrollbarWidth: 'none',
                 fontFamily: 'Inter, system-ui, sans-serif',
               }}
             />
@@ -220,9 +266,10 @@ export default function Chat() {
               onClick={handleSend}
               disabled={!input.trim() || sending}
               style={{
-                width: 34, height: 34, borderRadius: 8, border: 'none',
-                background: input.trim() && !sending ? 'linear-gradient(135deg, #0ea5e9, #38bdf8)' : 'rgba(255,255,255,0.08)',
-                color: input.trim() && !sending ? '#ffffff' : '#475569',
+                width: 34, height: 34,
+                borderRadius: 8, border: 'none',
+                background: input.trim() && !sending ? '#7c3aed' : '#2a1a3e',
+                color: input.trim() && !sending ? '#ffffff' : '#5050a0',
                 cursor: input.trim() && !sending ? 'pointer' : 'not-allowed',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 flexShrink: 0, transition: 'all 0.2s ease',
@@ -231,7 +278,7 @@ export default function Chat() {
               <Send size={15} />
             </button>
           </div>
-          <p style={{ color: '#475569', fontSize: '0.72rem', textAlign: 'center', marginTop: 8 }}>
+          <p style={{ color: '#4a4a6a', fontSize: '0.72rem', textAlign: 'center', marginTop: 8 }}>
             Enter para enviar · Shift+Enter para nueva línea
           </p>
         </div>

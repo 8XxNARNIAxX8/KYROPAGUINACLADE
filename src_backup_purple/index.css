@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background: #080808;
+    background-attachment: fixed;
+    color: #e8e8ff;
+    font-size: 15px;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.4); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(124,58,237,0.7); }
+}
+
+/* Glass card */
+.glass {
+  background: #161120;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid #3d1f5e;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.glass:hover {
+  background: #1d1530; border-color: #7c3aed;
+  box-shadow: 0 4px 24px rgba(124,58,237,0.2);
+}
+
+/* Gradient text */
+.grad-text {
+  background: linear-gradient(135deg, #7c3aed, #9333ea, #c0392b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Stat number */
+.stat-num {
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #ffffff;
+  font-size: 1.8rem;
+}
+
+/* Button primary */
+.btn-primary {
+  background: #7c3aed;
+  border-radius: 10px;
+  border: none;
+  color: white;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(124,58,237,0.5);
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fade-in 0.4s ease forwards; }
+
+/* Typography scale */
+h1 { font-size: 1.8rem; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; }
+h2 { font-size: 1.3rem; font-weight: 700; color: #f0f0ff; }
+h3 { font-size: 1rem;  font-weight: 600; color: #e0e0ff; }
+p   { color: #e8e8ff; }
+
+.label-uppercase {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #c0c0e0;
+}
+.table-header {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #c0c0e0;
+}
+.table-cell { font-size: 0.9rem; color: #e0e0f8; }
+.muted { color: #a0a0c8; }

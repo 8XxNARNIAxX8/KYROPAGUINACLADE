@@ -1,92 +1,99 @@
 import { useEffect, useState } from 'react';
-import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from 'recharts';
+import { DollarSign, TrendingUp, Activity, Flame } from 'lucide-react';
 import { fetchStats, fetchBudgets, fetchAlerts, fetchMovements } from '../api';
-import { SkeletonCard, SkeletonBar } from '../components/Skeletons';
 import type { StatCard, BudgetItem, Alert, Movement } from '../types';
 
-const ACCENT_COLOR = '#00ff88';
-const ACCENT_RGB = '0, 255, 136';
-
-const generateTimeSeriesData = () => {
-  const data = [];
-  for (let i = 0; i < 30; i++) {
-    data.push({
-      day: i + 1,
-      valor: Math.floor(Math.random() * 40000) + 240000,
-      caja: Math.floor(Math.random() * 15000) + 35000,
-      habitos: Math.floor(Math.random() * 8) + 3,
-    });
-  }
-  return data;
+const CARD: React.CSSProperties = {
+  background: 'rgba(14,165,233,0.05)',
+  backdropFilter: 'blur(20px)',
+  WebkitBackdropFilter: 'blur(20px)',
+  border: '1px solid rgba(14,165,233,0.15)',
+  borderRadius: 16,
+  boxShadow: '0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(14,165,233,0.2), inset 0 1px 0 rgba(255,255,255,0.08)',
+  transition: 'all 0.3s ease',
 };
 
-function StatNeonCard({ stat, loading }: { stat?: StatCard; loading: boolean }) {
-  if (loading || !stat) return <SkeletonCard />;
+const STAT_ICONS = [
+  <DollarSign size={22} />,
+  <TrendingUp size={22} />,
+  <Activity size={22} />,
+  <Flame size={22} />,
+];
 
+const genSeries = () => Array.from({ length: 30 }, (_, i) => ({
+  day: i + 1,
+  valor: Math.floor(Math.random() * 40000) + 260000,
+  caja: Math.floor(Math.random() * 15000) + 40000,
+}));
+
+function StatCard({ stat, index, loading }: { stat?: StatCard; index: number; loading: boolean }) {
+  if (loading || !stat) return (
+    <div style={{ ...CARD, minHeight: 130, overflow: 'hidden' }}>
+      <div style={{ height: 2, background: 'rgba(255,255,255,0.08)' }} />
+      <div style={{ padding: 20 }}>
+        <div style={{ width: 42, height: 42, borderRadius: 12, background: 'rgba(255,255,255,0.06)', marginBottom: 14 }} className="animate-pulse" />
+        <div className="h-3 rounded mb-3 animate-pulse" style={{ background: 'rgba(255,255,255,0.08)', width: '60%' }} />
+        <div className="h-8 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.08)', width: '80%' }} />
+      </div>
+    </div>
+  );
   return (
-    <div
-      className="bg-[#0d0d1a] border rounded-lg p-6 transition-all hover:scale-105 relative overflow-hidden"
-      style={{
-        borderColor: ACCENT_COLOR,
-        borderWidth: '2px',
-        boxShadow: `0 0 40px rgba(${ACCENT_RGB}, 0.6), 0 0 80px rgba(${ACCENT_RGB}, 0.3), inset 0 0 20px rgba(${ACCENT_RGB}, 0.1)`,
-      }}
-    >
-      <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(to right, transparent, ${ACCENT_COLOR}, transparent)` }} />
-      <p className="text-[#4a4a6a] text-xs font-mono uppercase tracking-widest mb-3">[ {stat.label} ]</p>
-      <p className="text-[#e8e8f0] text-5xl font-mono font-bold mb-2" style={{ color: ACCENT_COLOR }}>{stat.value}</p>
-      <div className="flex items-center gap-1 text-xs font-mono" style={{ color: ACCENT_COLOR }}>
-        {stat.positive ? '▲' : '▼'} {stat.change}
+    <div style={{
+      ...CARD, overflow: 'hidden',
+      animation: 'fadeInUp 0.4s ease forwards',
+      animationDelay: `${(index + 1) * 0.1}s`,
+      opacity: 0,
+    }}>
+      <div style={{ height: 2, background: 'linear-gradient(90deg, #0ea5e9, #38bdf8)' }} />
+      <div style={{ padding: 20 }}>
+        <div className="flex justify-between items-start mb-3">
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(14,165,233,0.15)', borderRadius: 12, padding: 10,
+            color: '#0ea5e9',
+            filter: 'drop-shadow(0 0 8px rgba(14,165,233,0.5))',
+          }}>
+            {STAT_ICONS[index % STAT_ICONS.length]}
+          </div>
+          <span style={{ color: stat.positive ? '#10b981' : '#ef4444', fontSize: 12, fontWeight: 500 }}>
+            {stat.positive ? '↑' : '↓'} {stat.change}
+          </span>
+        </div>
+        <p style={{ color: '#94a3b8', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>{stat.label}</p>
+        <p className="stat-num" style={{ fontSize: '1.9rem' }}>{stat.value}</p>
       </div>
     </div>
   );
 }
 
-function NeonBudgetBar({ item }: { item: BudgetItem }) {
+function BudgetBar({ item }: { item: BudgetItem }) {
   const pct = Math.min((item.spent / item.total) * 100, 100);
   const over = item.spent > item.total;
-
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       <div className="flex justify-between items-center">
-        <span className="text-[#e8e8f0] text-sm font-semibold">{item.label}</span>
-        <span className="text-xs font-mono" style={{ color: ACCENT_COLOR }}>
-          ${item.spent.toLocaleString()} / ${item.total.toLocaleString()}
-        </span>
+        <span style={{ color: '#cbd5e1', fontSize: 13, fontWeight: 500 }}>{item.label}</span>
+        <span className="stat-num" style={{ color: over ? '#ef4444' : '#94a3b8', fontSize: 12 }}>${(Number(item.spent)||0).toLocaleString()} / ${(Number(item.total)||0).toLocaleString()}</span>
       </div>
-      <div className="h-3 w-full border rounded-full overflow-hidden" style={{ borderColor: ACCENT_COLOR, borderWidth: '1.5px' }}>
-        <div
-          className="h-full rounded-full transition-all"
-          style={{
-            width: `${pct}%`,
-            backgroundColor: over ? '#ff0055' : ACCENT_COLOR,
-            boxShadow: `0 0 15px ${over ? '#ff0055' : ACCENT_COLOR}, inset 0 0 8px rgba(255, 255, 255, 0.2)`,
-          }}
-        />
+      <div style={{ height: 6, borderRadius: 99, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+        <div style={{ height: '100%', width: `${pct}%`, background: over ? '#ef4444' : 'linear-gradient(90deg, #0ea5e9, #38bdf8)', borderRadius: 99, transition: 'width 0.6s ease' }} />
       </div>
     </div>
   );
 }
 
-function AlertItem({ alert }: { alert: Alert }) {
-  const colors = {
-    critical: '#ff0055',
-    warning: '#ff7722',
-    info: '#00d9ff',
-  };
-  const bgColors = {
-    critical: 'rgba(255, 0, 85, 0.15)',
-    warning: 'rgba(255, 119, 34, 0.15)',
-    info: 'rgba(0, 217, 255, 0.15)',
-  };
+const LEVEL_COLOR: Record<string, string> = { critical: '#ef4444', warning: '#f59e0b', info: '#0ea5e9' };
 
+function AlertRow({ alert }: { alert: Alert }) {
+  const color = LEVEL_COLOR[alert.level] ?? '#0ea5e9';
   return (
-    <div
-      className="px-3 py-2 rounded border text-xs border-opacity-40"
-      style={{ borderColor: colors[alert.level], backgroundColor: bgColors[alert.level] }}
-    >
-      <p style={{ color: colors[alert.level] }} className="font-semibold font-mono">{alert.message}</p>
-      <p className="text-[#4a4a6a] text-xs mt-1">{alert.time}</p>
+    <div className="flex items-start gap-3 py-2.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+      <div style={{ width: 6, height: 6, borderRadius: '50%', background: color, marginTop: 5, flexShrink: 0, boxShadow: `0 0 6px ${color}` }} />
+      <div className="flex-1 min-w-0">
+        <p style={{ color: '#cbd5e1', fontSize: 12, fontWeight: 500, lineHeight: 1.4 }}>{alert.message}</p>
+        <p style={{ color: '#475569', fontSize: 11, marginTop: 2 }}>{alert.time}</p>
+      </div>
     </div>
   );
 }
@@ -96,176 +103,107 @@ export default function Dashboard() {
   const [budgets, setBudgets] = useState<BudgetItem[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [movements, setMovements] = useState<Movement[]>([]);
-  const [timeSeriesData] = useState(generateTimeSeriesData());
+  const [series] = useState(genSeries);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
-    Promise.all([fetchStats(), fetchBudgets(), fetchAlerts(), fetchMovements()]).then(
-      ([s, b, a, m]) => {
-        if (!cancelled) {
-          setStats(s);
-          setBudgets(b);
-          setAlerts(a);
-          setMovements(m);
-          setLoading(false);
-        }
-      }
-    );
-    return () => { cancelled = true; };
+    let ok = true;
+    Promise.all([fetchStats(), fetchBudgets(), fetchAlerts(), fetchMovements()]).then(([s, b, a, m]) => {
+      if (ok) { setStats(s); setBudgets(b); setAlerts(a); setMovements(m); setLoading(false); }
+    });
+    return () => { ok = false; };
   }, []);
 
   return (
-    <div className="space-y-6 relative">
-      {/* Scanline overlay */}
-      <div
-        className="fixed top-0 left-0 right-0 bottom-0 pointer-events-none opacity-5 z-0"
-        style={{
-          backgroundImage: 'repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.15) 0px, rgba(255, 255, 255, 0.15) 1px, transparent 1px, transparent 2px)',
-          animation: 'scanline-overlay 8s linear infinite',
-        }}
-      />
-
-      {/* Header */}
-      <div className="relative z-10">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#00ff88] to-transparent opacity-50 animate-scan-line" />
-        <h1 className="text-[#e8e8f0] text-4xl font-mono font-bold tracking-widest" style={{ color: ACCENT_COLOR }}>
-          SISTEMA OPERATIVO KYRO
+    <div className="space-y-6 fade-in">
+      <div>
+        <h1 style={{ color: '#f0f9ff', fontSize: '1.8rem', fontWeight: 800, letterSpacing: '-0.5px', marginBottom: 4 }}>
+          Sistema Operativo <span className="grad-text">Kyro</span>
         </h1>
-        <p className="text-[#4a4a6a] text-sm font-mono mt-2 flex items-center gap-2">
-          <span>[ v3.1 ]</span>
-          <span style={{ animation: 'blink 1s steps(2) infinite' }}>█</span>
-        </p>
+        <p style={{ color: '#475569', fontSize: '0.9rem' }}>Panel de control — {new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
       </div>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 z-10 relative">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {loading
-          ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
-          : stats.map((s, i) => <StatNeonCard key={i} stat={s} loading={false} />)
+          ? Array.from({ length: 4 }).map((_, i) => <StatCard key={i} loading={true} index={i} />)
+          : stats.map((s, i) => <StatCard key={i} stat={s} index={i} loading={false} />)
         }
       </div>
 
-      {/* Charts row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 z-10 relative">
-        {/* Patrimonio chart */}
-        <div
-          className="bg-[#0d0d1a] border rounded-lg p-5 transition-all"
-          style={{
-            borderColor: ACCENT_COLOR,
-            borderWidth: '2px',
-            boxShadow: `0 0 40px rgba(${ACCENT_RGB}, 0.4), 0 0 80px rgba(${ACCENT_RGB}, 0.2), inset 0 0 20px rgba(${ACCENT_RGB}, 0.05)`,
-          }}
-        >
-          <h3 className="text-[#00ff88] text-sm font-mono font-semibold mb-4 tracking-widest">[ PATRIMONIO NETO 30D ]</h3>
-          <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={timeSeriesData}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div style={{ ...CARD, padding: 20 }}>
+          <p style={{ color: '#94a3b8', fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 16 }}>Patrimonio Neto 30D</p>
+          <ResponsiveContainer width="100%" height={180}>
+            <AreaChart data={series}>
               <defs>
-                <linearGradient id="colorValor" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#00ff88" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#00ff88" stopOpacity={0.1} />
+                <linearGradient id="gradValor" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,255,136,0.15)" />
-              <XAxis dataKey="day" tick={{ fill: '#4a4a6a', fontSize: 11 }} />
-              <YAxis tick={{ fill: '#4a4a6a', fontSize: 11 }} />
-              <Area type="monotone" dataKey="valor" stroke="#00ff88" strokeWidth={2} fillOpacity={1} fill="url(#colorValor)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+              <XAxis dataKey="day" tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{ background: 'rgba(2,8,24,0.95)', border: '1px solid rgba(14,165,233,0.3)', borderRadius: '10px', color: '#f0f9ff', fontSize: '12px' }} wrapperStyle={{ outline: 'none' }} labelStyle={{ color: '#0ea5e9' }} cursor={{ fill: 'rgba(14,165,233,0.05)' }} />
+              <Area type="monotone" dataKey="valor" stroke="#0ea5e9" strokeWidth={2} fill="url(#gradValor)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Caja negocio chart */}
-        <div
-          className="bg-[#0d0d1a] border rounded-lg p-5 transition-all"
-          style={{
-            borderColor: ACCENT_COLOR,
-            borderWidth: '2px',
-            boxShadow: `0 0 40px rgba(${ACCENT_RGB}, 0.4), 0 0 80px rgba(${ACCENT_RGB}, 0.2), inset 0 0 20px rgba(${ACCENT_RGB}, 0.05)`,
-          }}
-        >
-          <h3 className="text-[#00ff88] text-sm font-mono font-semibold mb-4 tracking-widest">[ FLUJO CAJA 30D ]</h3>
-          <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={timeSeriesData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,255,136,0.15)" />
-              <XAxis dataKey="day" tick={{ fill: '#4a4a6a', fontSize: 11 }} />
-              <YAxis tick={{ fill: '#4a4a6a', fontSize: 11 }} />
-              <Line type="monotone" dataKey="caja" stroke="#00ff88" strokeWidth={2} dot={false} />
-            </LineChart>
+        <div style={{ ...CARD, padding: 20 }}>
+          <p style={{ color: '#94a3b8', fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 16 }}>Flujo de Caja 30D</p>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={series.slice(0, 15)}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+              <XAxis dataKey="day" tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{ background: 'rgba(2,8,24,0.95)', border: '1px solid rgba(14,165,233,0.3)', borderRadius: '10px', color: '#f0f9ff', fontSize: '12px' }} wrapperStyle={{ outline: 'none' }} labelStyle={{ color: '#0ea5e9' }} cursor={{ fill: 'rgba(14,165,233,0.05)' }} />
+              <Bar dataKey="caja" fill="#38bdf8" radius={[4, 4, 0, 0]} fillOpacity={0.8} />
+            </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Middle row - Budgets and Alerts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 z-10 relative">
-        {/* Budgets */}
-        <div
-          className="lg:col-span-2 bg-[#0d0d1a] border rounded-lg p-5 transition-all"
-          style={{
-            borderColor: ACCENT_COLOR,
-            borderWidth: '2px',
-            boxShadow: `0 0 40px rgba(${ACCENT_RGB}, 0.4), 0 0 80px rgba(${ACCENT_RGB}, 0.2), inset 0 0 20px rgba(${ACCENT_RGB}, 0.05)`,
-          }}
-        >
-          <h2 className="text-[#00ff88] text-sm font-mono font-semibold mb-5 tracking-widest">[ PRESUPUESTOS MES ]</h2>
-          <div className="space-y-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div style={{ ...CARD, padding: 20, gridColumn: 'span 2 / span 2' }}>
+          <p style={{ color: '#94a3b8', fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 20 }}>Presupuestos del Mes</p>
+          <div className="space-y-4">
             {loading
-              ? Array.from({ length: 4 }).map((_, i) => <SkeletonBar key={i} />)
-              : budgets.map((b, i) => <NeonBudgetBar key={i} item={b} />)
+              ? Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-4 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.08)' }} />)
+              : budgets.map((b, i) => <BudgetBar key={i} item={b} />)
             }
           </div>
         </div>
 
-        {/* Alerts */}
-        <div
-          className="bg-[#0d0d1a] border rounded-lg p-5 transition-all"
-          style={{
-            borderColor: ACCENT_COLOR,
-            borderWidth: '2px',
-            boxShadow: `0 0 40px rgba(${ACCENT_RGB}, 0.4), 0 0 80px rgba(${ACCENT_RGB}, 0.2), inset 0 0 20px rgba(${ACCENT_RGB}, 0.05)`,
-          }}
-        >
-          <h2 className="text-[#00ff88] text-sm font-mono font-semibold mb-4 tracking-widest">[ ALERTAS ]</h2>
-          <div className="space-y-2 max-h-64 overflow-y-auto">
-            {loading
-              ? null
-              : alerts.map((alert) => <AlertItem key={alert.id} alert={alert} />)
-            }
+        <div style={{ ...CARD, padding: 20 }}>
+          <p style={{ color: '#94a3b8', fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>Alertas</p>
+          <div>
+            {loading ? null : alerts.map(a => <AlertRow key={a.id} alert={a} />)}
           </div>
         </div>
       </div>
 
-      {/* Movements table */}
-      <div
-        className="bg-[#0d0d1a] border rounded-lg p-5 transition-all z-10 relative"
-        style={{
-          borderColor: ACCENT_COLOR,
-          borderWidth: '2px',
-          boxShadow: `0 0 40px rgba(${ACCENT_RGB}, 0.4), 0 0 80px rgba(${ACCENT_RGB}, 0.2), inset 0 0 20px rgba(${ACCENT_RGB}, 0.05)`,
-        }}
-      >
-        <h2 className="text-[#00ff88] text-sm font-mono font-semibold mb-4 tracking-widest">[ TRANSACCIONES ]</h2>
+      <div style={{ ...CARD, padding: 20 }}>
+        <p style={{ color: '#94a3b8', fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 16 }}>Transacciones Recientes</p>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm font-mono">
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
             <thead>
-              <tr className="border-b" style={{ borderColor: `rgba(${ACCENT_RGB}, 0.3)` }}>
-                <th className="text-left text-[#4a4a6a] text-xs py-2 px-2">FECHA</th>
-                <th className="text-left text-[#4a4a6a] text-xs py-2 px-2">DESCRIPCION</th>
-                <th className="text-left text-[#4a4a6a] text-xs py-2 px-2">CATEGORIA</th>
-                <th className="text-right text-[#4a4a6a] text-xs py-2 px-2">MONTO</th>
+              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                {['Fecha', 'Descripción', 'Categoría', 'Monto'].map(h => (
+                  <th key={h} style={{ textAlign: h === 'Monto' ? 'right' : 'left', padding: '8px 12px', color: '#475569', fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {movements.slice(0, 6).map((m) => (
-                <tr key={m.id} className="border-b" style={{ borderColor: `rgba(${ACCENT_RGB}, 0.1)` }}>
-                  <td className="py-2 px-2 text-[#4a4a6a]">{m.date}</td>
-                  <td className="py-2 px-2 text-[#e8e8f0]">{m.description}</td>
-                  <td className="py-2 px-2">
-                    <span className="px-2 py-1 rounded text-xs" style={{ backgroundColor: `rgba(${ACCENT_RGB}, 0.15)`, color: ACCENT_COLOR }}>
-                      {m.category}
-                    </span>
+              {movements.slice(0, 6).map(m => (
+                <tr key={m.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                  <td style={{ padding: '10px 12px', color: '#475569' }}>{m.date}</td>
+                  <td style={{ padding: '10px 12px', color: '#cbd5e1' }}>{m.description}</td>
+                  <td style={{ padding: '10px 12px' }}>
+                    <span style={{ background: 'rgba(14,165,233,0.1)', color: '#0ea5e9', border: '1px solid rgba(14,165,233,0.3)', borderRadius: 6, padding: '2px 10px', fontSize: 11, fontWeight: 500 }}>{m.category}</span>
                   </td>
-                  <td className="py-2 px-2 text-right" style={{ color: m.type === 'income' ? ACCENT_COLOR : '#e8e8f0' }}>
-                    {m.type === 'income' ? '+' : '-'}${m.amount.toLocaleString()}
+                  <td style={{ padding: '10px 12px', textAlign: 'right', color: m.type === 'income' ? '#10b981' : '#f0f9ff', fontWeight: 600 }} className="stat-num">
+                    {m.type === 'income' ? '+' : '-'}${(Number(m.amount) || 0).toLocaleString()}
                   </td>
                 </tr>
               ))}
